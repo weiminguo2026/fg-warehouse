@@ -360,20 +360,31 @@ async function writeProductLog(action, opts) {
   } catch (e) { console.warn(e); }
 }
 
-// ============ 加载成品 ============
+// ============ 加载成品（分页拉取，突破 1000 条限制） ============
 async function loadProducts() {
-  const { data, error } = await supabaseClient
-    .from(TB.products)
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(10000);
-  if (error) { alert(t("加载失败: ", "Load failed: ") + error.message); return; }
-  allProducts = data || [];
+  let allData = [];
+  let from = 0;
+  const CHUNK = 1000;
+  while (true) {
+    const { data, error } = await supabaseClient
+      .from(TB.products)
+      .select("*")
+      .order("created_at", { ascending: false })
+      .range(from, from + CHUNK - 1);
+    if (error) {
+      alert(t("加载失败: ", "Load failed: ") + error.message);
+      return;
+    }
+    if (!data || data.length === 0) break;
+    allData = allData.concat(data);
+    if (data.length < CHUNK) break;
+    from += CHUNK;
+  }
+  allProducts = allData;
   filteredProducts = allProducts;
   currentPage = 1;
   renderProducts();
 }
-
 function renderProducts() {
   const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
   const categoryFilter = document.getElementById("categoryFilter")?.value || "";
