@@ -2520,7 +2520,7 @@ async function loadReport() {
   }
   // ← 这里原本有一行 if (error) {...}，现在删掉
 
-  const rows = (movesRaw || []).filter(x => !isInitMove(x));  const rows = (movesRaw || []).filter(x => !isInitMove(x));
+  const rows = (movesRaw || []).filter(x => !isInitMove(x));  
 
   // ⭐ 加载种类变更历史（用于按期间查种类）
   const historyMap = await loadCategoryHistory();
